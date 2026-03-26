@@ -13,7 +13,7 @@ class Settings:
     gemini_embedding_model: str = os.getenv("GEMINI_EMBEDDING_MODEL", "models/text-embedding-004")
     ollama_chat_model: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.1")
     ollama_embedding_model: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
-    allow_ollama_fallback: bool = os.getenv("ALLOW_OLLAMA_FALLBACK", "true").lower() == "true"
+    allow_ollama_fallback: bool = os.getenv("ALLOW_OLLAMA_FALLBACK", "false").lower() == "true"
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "1200"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "200"))
     top_k: int = int(os.getenv("TOP_K", "5"))
