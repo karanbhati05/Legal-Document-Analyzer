@@ -1,0 +1,6 @@
+.vercel
+.env
+.streamlit/secrets.toml
+.venv/
+chroma/
+__pycache__/
