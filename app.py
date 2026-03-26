@@ -23,9 +23,13 @@ def _sync_env_from_streamlit_secrets() -> None:
         "CHUNK_OVERLAP",
         "TOP_K",
     ]
-    for key in secret_keys:
-        if key in st.secrets and key not in os.environ:
-            os.environ[key] = str(st.secrets[key])
+    try:
+        for key in secret_keys:
+            if key in st.secrets and key not in os.environ:
+                os.environ[key] = str(st.secrets[key])
+    except Exception:
+        # Local runs may not have a Streamlit secrets file.
+        return
 
 
 _sync_env_from_streamlit_secrets()
