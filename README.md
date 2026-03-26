@@ -83,10 +83,10 @@ Open the local URL shown by Streamlit.
 GOOGLE_API_KEY = "your_gemini_api_key"
 MODEL_PROVIDER = "gemini"
 GEMINI_MODEL = "gemini-2.5-flash"
-GEMINI_EMBEDDING_MODEL = "models/gemini-embedding-001"
-CHUNK_SIZE = 1200
-CHUNK_OVERLAP = 200
-TOP_K = 5
+GEMINI_EMBEDDING_MODEL = "gemini-embedding-001"
+CHUNK_SIZE = 900
+CHUNK_OVERLAP = 120
+TOP_K = 3
 ```
 
 5. Click `Deploy`.
