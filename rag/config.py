@@ -10,9 +10,7 @@ class Settings:
     openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
     openai_embedding_model: str = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    local_embedding_model: str = os.getenv(
-        "LOCAL_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
-    )
+    gemini_embedding_model: str = os.getenv("GEMINI_EMBEDDING_MODEL", "models/text-embedding-004")
     ollama_chat_model: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.1")
     ollama_embedding_model: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
     allow_ollama_fallback: bool = os.getenv("ALLOW_OLLAMA_FALLBACK", "true").lower() == "true"

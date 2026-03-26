@@ -17,7 +17,7 @@ def _sync_env_from_streamlit_secrets() -> None:
     secret_keys = [
         "GOOGLE_API_KEY",
         "GEMINI_MODEL",
-        "LOCAL_EMBEDDING_MODEL",
+        "GEMINI_EMBEDDING_MODEL",
         "MODEL_PROVIDER",
         "CHUNK_SIZE",
         "CHUNK_OVERLAP",

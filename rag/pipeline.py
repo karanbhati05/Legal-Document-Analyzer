@@ -52,9 +52,9 @@ class LegalRAGAnalyzer:
 
             return OpenAIEmbeddings(model=self.settings.openai_embedding_model)
         if self.settings.using_gemini:
-            from langchain_huggingface import HuggingFaceEmbeddings
+            from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-            return HuggingFaceEmbeddings(model_name=self.settings.local_embedding_model)
+            return GoogleGenerativeAIEmbeddings(model=self.settings.gemini_embedding_model)
         if self.settings.using_ollama:
             from langchain_ollama import OllamaEmbeddings
 
