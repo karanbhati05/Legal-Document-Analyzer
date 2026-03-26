@@ -62,6 +62,42 @@ class LegalRAGAnalyzer:
 
         raise ValueError("Unsupported MODEL_PROVIDER. Use 'openai', 'gemini', or 'ollama'.")
 
+    def _try_alternate_gemini_embeddings(self, chunks, chroma_settings):
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+        candidates = [
+            self.settings.gemini_embedding_model,
+            "models/gemini-embedding-001",
+            "gemini-embedding-001",
+            "models/embedding-001",
+            "embedding-001",
+        ]
+
+        seen = set()
+        unique_candidates = []
+        for model_name in candidates:
+            if model_name not in seen:
+                seen.add(model_name)
+                unique_candidates.append(model_name)
+
+        last_error = None
+        for model_name in unique_candidates:
+            try:
+                alt_embeddings = GoogleGenerativeAIEmbeddings(model=model_name)
+                vectorstore = Chroma.from_documents(
+                    documents=chunks,
+                    embedding=alt_embeddings,
+                    client_settings=chroma_settings,
+                )
+                self.embeddings = alt_embeddings
+                return vectorstore
+            except Exception as exc:
+                last_error = exc
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("No Gemini embedding model candidates were available.")
+
     def ingest(self, uploaded_files) -> Dict[str, int]:
         raw_docs = load_uploaded_documents(uploaded_files)
         if not raw_docs:
@@ -81,7 +117,13 @@ class LegalRAGAnalyzer:
                 embedding=self.embeddings,
                 client_settings=chroma_settings,
             )
-        except Exception:
+        except Exception as exc:
+            if self.settings.using_gemini:
+                error_text = str(exc).lower()
+                if "embedcontent" in error_text or "embedding" in error_text or "not found" in error_text:
+                    self.vectorstore = self._try_alternate_gemini_embeddings(chunks, chroma_settings)
+                    return {"raw_documents": len(raw_docs), "chunks": len(chunks)}
+
             if self.settings.allow_ollama_fallback:
                 from langchain_ollama import OllamaEmbeddings
 
