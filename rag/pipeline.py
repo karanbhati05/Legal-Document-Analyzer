@@ -54,7 +54,8 @@ class LegalRAGAnalyzer:
         if self.settings.using_gemini:
             from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-            return GoogleGenerativeAIEmbeddings(model=self.settings.gemini_embedding_model)
+            model_name = self._normalize_gemini_embedding_model(self.settings.gemini_embedding_model)
+            return GoogleGenerativeAIEmbeddings(model=model_name)
         if self.settings.using_ollama:
             from langchain_ollama import OllamaEmbeddings
 
@@ -62,15 +63,23 @@ class LegalRAGAnalyzer:
 
         raise ValueError("Unsupported MODEL_PROVIDER. Use 'openai', 'gemini', or 'ollama'.")
 
+    @staticmethod
+    def _normalize_gemini_embedding_model(model_name: str) -> str:
+        if not model_name:
+            return "models/gemini-embedding-001"
+        return model_name if model_name.startswith("models/") else f"models/{model_name}"
+
     def _try_alternate_gemini_embeddings(self, chunks, chroma_settings):
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
         candidates = [
-            self.settings.gemini_embedding_model,
+            self._normalize_gemini_embedding_model(self.settings.gemini_embedding_model),
             "models/gemini-embedding-001",
             "gemini-embedding-001",
             "models/embedding-001",
             "embedding-001",
+            "models/text-embedding-004",
+            "text-embedding-004",
         ]
 
         seen = set()
@@ -117,12 +126,12 @@ class LegalRAGAnalyzer:
                 embedding=self.embeddings,
                 client_settings=chroma_settings,
             )
-        except Exception as exc:
+        except Exception:
             if self.settings.using_gemini:
-                error_text = str(exc).lower()
-                if "embedcontent" in error_text or "embedding" in error_text or "not found" in error_text:
-                    self.vectorstore = self._try_alternate_gemini_embeddings(chunks, chroma_settings)
-                    return {"raw_documents": len(raw_docs), "chunks": len(chunks)}
+                # Gemini embedding endpoints can reject some model name formats.
+                # Always try known compatible variants before failing.
+                self.vectorstore = self._try_alternate_gemini_embeddings(chunks, chroma_settings)
+                return {"raw_documents": len(raw_docs), "chunks": len(chunks)}
 
             if self.settings.allow_ollama_fallback:
                 from langchain_ollama import OllamaEmbeddings
