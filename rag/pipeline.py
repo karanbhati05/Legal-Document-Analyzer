@@ -77,11 +77,17 @@ class LegalRAGAnalyzer:
             normalized = normalized[len("models/") :]
 
         if normalized.startswith("models/"):
+            model_id = normalized[len("models/") :]
+            if model_id == "text-embedding-004":
+                return "models/gemini-embedding-001"
             return normalized
 
         # If a path-like value is provided, keep the final segment as model id.
         if "/" in normalized:
             normalized = normalized.split("/")[-1]
+
+        if normalized == "text-embedding-004":
+            normalized = "gemini-embedding-001"
 
         return f"models/{normalized}"
 
@@ -92,7 +98,6 @@ class LegalRAGAnalyzer:
             self._normalize_gemini_embedding_model(self.settings.gemini_embedding_model),
             "models/gemini-embedding-001",
             "models/embedding-001",
-            "models/text-embedding-004",
         ]
 
         seen = set()
