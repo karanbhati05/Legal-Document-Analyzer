@@ -67,7 +67,23 @@ class LegalRAGAnalyzer:
     def _normalize_gemini_embedding_model(model_name: str) -> str:
         if not model_name:
             return "models/gemini-embedding-001"
-        return model_name if model_name.startswith("models/") else f"models/{model_name}"
+
+        normalized = str(model_name).strip().strip('"').strip("'")
+        if not normalized:
+            return "models/gemini-embedding-001"
+
+        # Guard against accidental duplicated prefix from user-provided values.
+        while normalized.startswith("models/models/"):
+            normalized = normalized[len("models/") :]
+
+        if normalized.startswith("models/"):
+            return normalized
+
+        # If a path-like value is provided, keep the final segment as model id.
+        if "/" in normalized:
+            normalized = normalized.split("/")[-1]
+
+        return f"models/{normalized}"
 
     def _try_alternate_gemini_embeddings(self, chunks, chroma_settings):
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -75,11 +91,8 @@ class LegalRAGAnalyzer:
         candidates = [
             self._normalize_gemini_embedding_model(self.settings.gemini_embedding_model),
             "models/gemini-embedding-001",
-            "gemini-embedding-001",
             "models/embedding-001",
-            "embedding-001",
             "models/text-embedding-004",
-            "text-embedding-004",
         ]
 
         seen = set()
