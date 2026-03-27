@@ -4,3 +4,6 @@
 .venv/
 chroma/
 __pycache__/
+node_modules/
+.next/
+out/

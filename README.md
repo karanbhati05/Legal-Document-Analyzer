@@ -1,116 +1,84 @@
-# Legal Document Analyzer (RAG + GenAI)
+# Legal Document Analyzer (Vercel + Gemini RAG)
 
-A legal-document analysis app where users can upload documents and get:
+Upload legal documents and get:
 
 - Explanation of legal content
 - Summary of key points
-- Answers to specific user queries
+- Answers to user-specific queries
 
-This solution uses Retrieval-Augmented Generation (RAG):
+This app is Gemini-only and Vercel-deployable using Next.js.
 
-1. Ingest documents
-2. Split into chunks
-3. Embed chunks into a vector DB (Chroma)
-4. Retrieve relevant context per task/query
-5. Generate responses with Gemini (with optional local fallback)
+## Stack
 
-## Features
+- Next.js App Router
+- Vercel Serverless API route
+- Gemini 2.5 Flash for generation
+- Gemini Embedding 1 for retrieval
 
-- Multi-document upload
-- RAG retrieval over uploaded files
-- Separate actions for Explanation, Summary, and Query Answering
-- Gemini-first generation workflow
-- Legal-safe prompting (no fabrication and explicit uncertainty)
+## Local Run
 
-## Tech Stack
-
-- Python + Streamlit UI
-- LangChain orchestration
-- Chroma vector store
-- Gemini model + local embeddings
-
-## Project Structure
-
-```
-.
-├── app.py
-├── requirements.txt
-├── .env.example
-└── rag/
-    ├── __init__.py
-    ├── config.py
-    ├── loaders.py
-    ├── pipeline.py
-    └── prompts.py
-```
-
-## Setup
-
-1. Create and activate a virtual environment.
-2. Install dependencies:
+1. Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+npm install
 ```
 
-3. Copy environment template:
+2. Copy environment file:
 
 ```bash
 copy .env.example .env
 ```
 
-4. Update `.env`:
-- Set `MODEL_PROVIDER=gemini`
-- Set `GOOGLE_API_KEY`
-- Optionally tune `GEMINI_MODEL`, `CHUNK_SIZE`, `CHUNK_OVERLAP`, `TOP_K`
+3. Add your API key in `.env`.
 
-## Run
+4. Run:
 
 ```bash
-streamlit run app.py
+npm run dev
 ```
 
-Open the local URL shown by Streamlit.
+Open `http://localhost:3000`.
 
-## Deploy On Streamlit Community Cloud
+## Vercel Deploy
 
-1. Push this project to GitHub.
-2. Open Streamlit Community Cloud and click `Create app`.
-3. Select your repo, branch, and set main file path to `app.py`.
-4. In app settings, add Secrets using this format:
+1. Ensure this repo is linked to Vercel (`vercel` command once).
+2. Add env vars in Vercel:
 
-```toml
-GOOGLE_API_KEY = "your_gemini_api_key"
-MODEL_PROVIDER = "gemini"
-GEMINI_MODEL = "gemini-2.5-flash"
-GEMINI_EMBEDDING_MODEL = "gemini-embedding-001"
-CHUNK_SIZE = 900
-CHUNK_OVERLAP = 120
-TOP_K = 3
+```bash
+vercel env add GOOGLE_API_KEY production
+vercel env add GEMINI_MODEL production
+vercel env add GEMINI_EMBEDDING_MODEL production
+vercel env add CHUNK_SIZE production
+vercel env add CHUNK_OVERLAP production
+vercel env add TOP_K production
 ```
 
-5. Click `Deploy`.
+Recommended values:
 
-## Supported Document Types
+- `GEMINI_MODEL=gemini-2.5-flash`
+- `GEMINI_EMBEDDING_MODEL=models/gemini-embedding-001`
+- `CHUNK_SIZE=900`
+- `CHUNK_OVERLAP=120`
+- `TOP_K=3`
 
-Direct support:
+3. Deploy:
+
+```bash
+vercel --prod
+```
+
+## API
+
+- Route: `POST /api/analyze`
+- Input: `multipart/form-data` with `files[]` and optional `query`
+- Output: `explanation`, `summary`, `answer`, and `stats`
+
+## Supported Files
 
 - PDF (`.pdf`)
 - DOCX (`.docx`)
-- TXT/MD/RTF/CSV/JSON/HTML/XML
+- TXT/MD/RTF/CSV/JSON/HTML/XML (best-effort text decode)
 
-Unknown types are attempted as best-effort text decode.
+## Note
 
-## RAG Flow
-
-- `load_uploaded_documents()` reads and normalizes document text.
-- `RecursiveCharacterTextSplitter` chunks content.
-- `Chroma.from_documents(...)` creates vector index.
-- Retriever pulls top-k chunks for each task.
-- Prompt templates generate explanation, summary, and Q&A.
-
-## Notes
-
-- This tool is for informational analysis and not legal advice.
-- Accuracy depends on document quality and model selection.
-- Scanned PDFs without text extraction may need OCR preprocessing.
+This tool provides informational analysis and not legal advice.
