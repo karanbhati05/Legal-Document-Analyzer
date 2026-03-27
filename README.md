@@ -8,6 +8,10 @@ Upload legal documents and get:
 
 This app is Gemini-only and Vercel-deployable using Next.js.
 
+## Live App
+
+- Production: https://legal-document-analyzer-next.vercel.app
+
 ## Stack
 
 - Next.js App Router
