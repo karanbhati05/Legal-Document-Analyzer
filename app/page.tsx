@@ -12,6 +12,72 @@ type AnalyzeResponse = {
   answer: string;
 };
 
+type ParsedSection = {
+  title: string;
+  bullets: string[];
+  paragraphs: string[];
+};
+
+function parseStructuredText(text: string): ParsedSection[] {
+  const lines = (text || "").split(/\r?\n/).map((line) => line.trim());
+  const sections: ParsedSection[] = [{ title: "Overview", bullets: [], paragraphs: [] }];
+
+  let current = sections[0];
+
+  for (const rawLine of lines) {
+    if (!rawLine) {
+      continue;
+    }
+
+    const headingHashMatch = rawLine.match(/^#{1,6}\s+(.+)$/);
+    const headingBoldMatch = rawLine.match(/^\*\*(.+?)\*\*:?$/);
+    const headingColonMatch = rawLine.match(/^([A-Z][A-Za-z0-9\s\-\/()]{2,80}):$/);
+    const bulletMatch = rawLine.match(/^[-*•]\s+(.+)$/) || rawLine.match(/^\d+\.\s+(.+)$/);
+
+    if (headingHashMatch || headingBoldMatch || headingColonMatch) {
+      const title = (headingHashMatch?.[1] || headingBoldMatch?.[1] || headingColonMatch?.[1] || "Section").trim();
+      current = { title, bullets: [], paragraphs: [] };
+      sections.push(current);
+      continue;
+    }
+
+    if (bulletMatch) {
+      current.bullets.push(bulletMatch[1].trim());
+      continue;
+    }
+
+    current.paragraphs.push(rawLine);
+  }
+
+  return sections.filter((section) => section.bullets.length > 0 || section.paragraphs.length > 0);
+}
+
+function OutputPanel({ title, text }: { title: string; text: string }) {
+  const sections = useMemo(() => parseStructuredText(text), [text]);
+
+  return (
+    <section className="card result-card">
+      <h2>{title}</h2>
+      {sections.length === 0 && <p>No content generated.</p>}
+      {sections.map((section, idx) => (
+        <article key={`${section.title}-${idx}`} className="result-section">
+          <h3>{section.title}</h3>
+          {section.paragraphs.map((paragraph, pIdx) => (
+            <p key={`p-${pIdx}`}>{paragraph}</p>
+          ))}
+          {section.bullets.length > 0 && (
+            <ul>
+              {section.bullets.map((bullet, bIdx) => (
+                <li key={`b-${bIdx}`}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </section>
+  );
+}
+
 export default function HomePage() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [query, setQuery] = useState("");
@@ -100,21 +166,21 @@ export default function HomePage() {
 
       {result && (
         <div className="grid">
-          <section className="card">
-            <h2>Explanation</h2>
-            <pre>{result.explanation}</pre>
-          </section>
-          <section className="card">
-            <h2>Summary</h2>
-            <pre>{result.summary}</pre>
-          </section>
-          <section className="card">
-            <h2>Answer</h2>
-            <pre>{result.answer || "No query provided."}</pre>
-          </section>
-          <section className="card">
+          <OutputPanel title="Explanation" text={result.explanation} />
+          <OutputPanel title="Summary" text={result.summary} />
+          <OutputPanel title="Answer" text={result.answer || "No query provided."} />
+          <section className="card result-card">
             <h2>Stats</h2>
-            <pre>{JSON.stringify(result.stats, null, 2)}</pre>
+            <div className="stats-grid">
+              <div className="stat-chip">
+                <span>Files</span>
+                <strong>{result.stats.files}</strong>
+              </div>
+              <div className="stat-chip">
+                <span>Chunks</span>
+                <strong>{result.stats.chunks}</strong>
+              </div>
+            </div>
           </section>
         </div>
       )}

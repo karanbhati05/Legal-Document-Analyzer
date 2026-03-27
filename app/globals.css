@@ -99,3 +99,61 @@ pre {
   color: var(--accent-2);
   font-weight: 600;
 }
+
+.result-card h2 {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.result-section {
+  padding: 12px;
+  border: 1px solid #e5dbc9;
+  border-radius: 10px;
+  background: #fffaf1;
+  margin-bottom: 10px;
+}
+
+.result-section h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #7a3420;
+}
+
+.result-section p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.result-section ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.result-section li {
+  margin-bottom: 6px;
+  line-height: 1.45;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.stat-chip {
+  border: 1px solid #d8cbb2;
+  border-radius: 10px;
+  background: #fff8e9;
+  padding: 10px;
+}
+
+.stat-chip span {
+  display: block;
+  font-size: 12px;
+  color: #6f6155;
+}
+
+.stat-chip strong {
+  font-size: 20px;
+  color: #1f1a17;
+}
